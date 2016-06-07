@@ -128,14 +128,13 @@ def _install_grub2(device, root_uuid, efi_system_part_uuid=None):
 
         # Generate custom kernel settings
         kparams = utils._read_params_from_file('/tmp/kernel_params.txt')
-        kernel_args = [key + '=' + value for key, value in kparams.iteritems()]
-        kernel_args = ','.join(map(str, kernel_args))
-
-        # Set Kernel Arguments
-        utils.execute('chroot %(path)s /bin/bash -c '
-                      '"/usr/sbin/grubby --update-kernel=ALL --args=%('
-                      'k_args)s"' % {'path': path, 'k_args': kernel_args},
-                      shell=True, env_variables={'PATH': path_variable})
+        for key, value in kparams.iteritems():
+            kernel_arg = key+"="+value
+            utils.execute('chroot %(path)s /bin/bash -c '
+                          '"/usr/sbin/grubby --update-kernel=ALL --args='
+                          '%(k_args)s"' % {'path': path, 'k_args':
+                                           kernel_arg}, shell=True,
+                          env_variables={'PATH': path_variable})
 
         LOG.info("GRUB2 successfully installed on %s", device)
 
